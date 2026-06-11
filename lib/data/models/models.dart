@@ -317,7 +317,7 @@ class WalletState {
 
 // ─── Projets (côté client) & devis structurés ───
 
-enum ProjetStatut { enAttente, devisRecus, enCours, termine }
+enum ProjetStatut { enAttente, devisRecus, enCours, enValidation, termine }
 
 @immutable
 class Projet {
@@ -331,6 +331,9 @@ class Projet {
     required this.budget,
     required this.date,
     required this.statut,
+    this.artisanDone = false,
+    this.clientNote,
+    this.clientComment,
   });
 
   final String id;
@@ -343,7 +346,22 @@ class Projet {
   final String date;
   final ProjetStatut statut;
 
-  Projet copyWith({ProjetStatut? statut}) {
+  /// L'artisan a marqué le travail comme terminé.
+  final bool artisanDone;
+
+  /// Note (1-5) et commentaire laissés par le client à la réception.
+  final int? clientNote;
+  final String? clientComment;
+
+  /// Le client a confirmé la bonne réalisation (et noté).
+  bool get clientConfirmed => clientNote != null;
+
+  Projet copyWith({
+    ProjetStatut? statut,
+    bool? artisanDone,
+    int? clientNote,
+    String? clientComment,
+  }) {
     return Projet(
       id: id,
       titre: titre,
@@ -354,6 +372,9 @@ class Projet {
       budget: budget,
       date: date,
       statut: statut ?? this.statut,
+      artisanDone: artisanDone ?? this.artisanDone,
+      clientNote: clientNote ?? this.clientNote,
+      clientComment: clientComment ?? this.clientComment,
     );
   }
 }

@@ -35,6 +35,12 @@ TaBadge projetStatutBadge(BuildContext context, ProjetStatut statut) {
       foreground: t.primary,
       icon: TaIcons.wrench,
     ),
+    ProjetStatut.enValidation => TaBadge(
+      label: 'En validation',
+      background: t.surface2,
+      foreground: t.text2,
+      icon: TaIcons.shield,
+    ),
     ProjetStatut.termine => TaBadge(
       label: 'Terminé',
       background: t.primary,
@@ -512,7 +518,7 @@ class _ProjetProgress extends StatelessWidget {
 
   final ProjetStatut statut;
 
-  static const _steps = ['Demande', 'Devis', 'En cours', 'Terminé'];
+  static const _steps = ['Demande', 'Devis', 'En cours', 'Validation', 'Fini'];
 
   @override
   Widget build(BuildContext context) {
@@ -521,7 +527,8 @@ class _ProjetProgress extends StatelessWidget {
       ProjetStatut.enAttente => 1,
       ProjetStatut.devisRecus => 2,
       ProjetStatut.enCours => 3,
-      ProjetStatut.termine => 4,
+      ProjetStatut.enValidation => 4,
+      ProjetStatut.termine => 5,
     };
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

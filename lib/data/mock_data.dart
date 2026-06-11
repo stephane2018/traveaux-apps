@@ -565,7 +565,11 @@ abstract final class MockData {
       urgence: 'Ce mois-ci',
       budget: '250 000 – 400 000 F',
       date: 'Hier',
-      statut: ProjetStatut.devisRecus,
+      // Chantier réalisé : client a noté + artisan a terminé → validation.
+      statut: ProjetStatut.enValidation,
+      artisanDone: true,
+      clientNote: 5,
+      clientComment: 'Travail impeccable, ponctuel et très propre. Merci !',
     ),
     Projet(
       id: 'p3',
@@ -616,6 +620,8 @@ abstract final class MockData {
         DevisLigne(label: 'Début des travaux', valeur: 'Lundi prochain'),
       ],
       date: 'Hier · 17:40',
+      statut: DevisStatut.accepte,
+      rdv: 'Lundi 16 juin · Matin',
     ),
     DevisDoc(
       id: 'q3',

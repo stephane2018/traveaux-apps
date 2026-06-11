@@ -31,14 +31,14 @@ class _MesDevisScreenState extends ConsumerState<MesDevisScreen> {
 
     // Devis sur les projets du client, plus récents d'abord.
     final projetIds = projets.map((p) => p.id).toSet();
-    final devis =
-        allDevis.where((d) => projetIds.contains(d.projetId)).toList();
-    final recus =
-        devis.where((d) => d.statut == DevisStatut.propose).toList();
-    final traites =
-        devis.where((d) => d.statut != DevisStatut.propose).toList();
-    final acceptes =
-        devis.where((d) => d.statut == DevisStatut.accepte).length;
+    final devis = allDevis
+        .where((d) => projetIds.contains(d.projetId))
+        .toList();
+    final recus = devis.where((d) => d.statut == DevisStatut.propose).toList();
+    final traites = devis
+        .where((d) => d.statut != DevisStatut.propose)
+        .toList();
+    final acceptes = devis.where((d) => d.statut == DevisStatut.accepte).length;
 
     final liste = _tab == 0 ? recus : traites;
 
@@ -86,8 +86,7 @@ class _MesDevisScreenState extends ConsumerState<MesDevisScreen> {
                       itemCount: liste.length,
                       separatorBuilder: (_, _) =>
                           const SizedBox(height: TaDims.gap),
-                      itemBuilder: (context, i) =>
-                          _DevisCard(devis: liste[i]),
+                      itemBuilder: (context, i) => _DevisCard(devis: liste[i]),
                     ),
             ),
           ],

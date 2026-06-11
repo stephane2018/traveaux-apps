@@ -10,6 +10,7 @@ import '../../providers/data_providers.dart';
 import '../../providers/projets_provider.dart';
 import '../../shared/widgets/widgets.dart';
 import 'widgets/devis_detail_sheet.dart';
+import 'widgets/rate_projet_sheet.dart';
 
 /// Détail d'un projet client : description, méta et devis reçus.
 class ProjetDetailScreen extends ConsumerWidget {
@@ -48,6 +49,9 @@ class ProjetDetailScreen extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   spacing: TaDims.gap,
                   children: [
+                    // Suivi de réalisation (devis accepté → validation).
+                    if (projet.statut.index >= ProjetStatut.enCours.index)
+                      _SuiviCard(projet: projet),
                     TaSectionHead(title: 'Devis reçus (${devis.length})'),
                     if (devis.isEmpty)
                       const _WaitingCard()
@@ -198,6 +202,7 @@ class _HeaderStatut extends StatelessWidget {
       ProjetStatut.enAttente => ('En attente', t.text2, TaIcons.clock),
       ProjetStatut.devisRecus => ('Devis reçus', t.accentStrong, TaIcons.doc),
       ProjetStatut.enCours => ('En cours', t.primary, TaIcons.wrench),
+      ProjetStatut.enValidation => ('En validation', t.text2, TaIcons.shield),
       ProjetStatut.termine => ('Terminé', t.primaryStrong, TaIcons.check),
     };
     return Container(
@@ -359,6 +364,151 @@ class _DevisCard extends ConsumerWidget {
               expanded: true,
               onPressed: () => showDevisDetailSheet(context, devisId: d.id),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Carte de suivi de réalisation côté client : confirmer & noter, puis
+/// statut de validation.
+class _SuiviCard extends StatelessWidget {
+  const _SuiviCard({required this.projet});
+
+  final Projet projet;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.ta;
+    final p = projet;
+
+    // 1) Travaux en cours, pas encore confirmés par le client.
+    if (p.statut == ProjetStatut.enCours && !p.clientConfirmed) {
+      return TaCard(
+        padding: const EdgeInsets.all(TaDims.pad),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              spacing: 11,
+              children: [
+                TaIconBox(
+                  icon: TaIcons.wrench,
+                  size: 42,
+                  radius: 13,
+                  iconSize: 20,
+                  background: t.primarySoft,
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Travaux terminés ?',
+                        style: TextStyle(
+                          fontSize: TaDims.fs,
+                          fontWeight: FontWeight.w800,
+                          color: t.text,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Confirmez la bonne réalisation et notez l’artisan.',
+                        style: context.taSub,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            TaButton(
+              label: 'Confirmer & noter',
+              expanded: true,
+              onPressed: () => showRateProjetSheet(context, projetId: p.id),
+              leading: TaIcon(
+                TaIcons.check,
+                size: 16,
+                mono: true,
+                color: TaButton.inkColor(context, TaButtonVariant.cta),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // 2) Le client a noté : afficher l'évaluation + l'état d'attente.
+    final enValidation = p.statut == ProjetStatut.enValidation;
+    return TaCard(
+      padding: const EdgeInsets.all(TaDims.pad),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (p.clientConfirmed) ...[
+            Row(
+              children: [
+                Text('VOTRE ÉVALUATION', style: context.taLabel),
+                const Spacer(),
+                TaStars(note: p.clientNote!.toDouble(), size: 16),
+              ],
+            ),
+            if (p.clientComment != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                '« ${p.clientComment!} »',
+                style: TextStyle(
+                  fontSize: TaDims.fsSm,
+                  fontWeight: FontWeight.w500,
+                  height: 1.5,
+                  fontStyle: FontStyle.italic,
+                  color: t.text2,
+                ),
+              ),
+            ],
+            const TaDivider(margin: EdgeInsets.symmetric(vertical: 14)),
+          ],
+          Row(
+            spacing: 11,
+            children: [
+              TaIconBox(
+                icon: enValidation ? TaIcons.shield : TaIcons.check,
+                size: 42,
+                radius: 13,
+                iconSize: 20,
+                background: enValidation ? t.surface2 : t.primarySoft,
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      enValidation
+                          ? 'En attente de validation'
+                          : p.statut == ProjetStatut.termine
+                          ? 'Projet terminé'
+                          : 'Confirmé de votre côté',
+                      style: TextStyle(
+                        fontSize: TaDims.fsSm,
+                        fontWeight: FontWeight.w800,
+                        color: t.text,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      enValidation
+                          ? 'L’administration vérifie la réalisation avant de '
+                                'libérer le paiement.'
+                          : p.statut == ProjetStatut.termine
+                          ? 'Le paiement a été libéré à l’artisan.'
+                          : 'En attente de la confirmation de l’artisan.',
+                      style: context.taSub,
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),

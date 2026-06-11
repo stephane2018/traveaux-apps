@@ -187,6 +187,59 @@ void main() {
     expect(find.textContaining('Accepté'), findsWidgets);
   });
 
+  testWidgets('client : confirme & note un projet en cours', (tester) async {
+    await pumpApp(tester);
+    await tester.tap(find.text('Continuer'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Projets').first);
+    await tester.pumpAndSettle();
+
+    // Accepte le devis de « Fuite sous évier » → projet en cours.
+    await tester.tap(find.text('Fuite sous évier de cuisine'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Voir le devis'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('J’accepte'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Confirmer le rendez-vous'));
+    await tester.pumpAndSettle();
+    // Ferme le bottom sheet du devis (reste ouvert sur l'état accepté).
+    await tester.tapAt(const Offset(200, 60));
+    await tester.pumpAndSettle();
+
+    // La carte de suivi propose de confirmer & noter.
+    expect(find.text('Travaux terminés ?'), findsWidgets);
+    await tester.tap(find.text('Confirmer & noter').last);
+    await tester.pumpAndSettle();
+
+    // Sheet de notation : choisir 5 étoiles puis confirmer.
+    final stars = find.byWidgetPredicate(
+      (w) => w is TaIcon && w.icon == TaIcons.star,
+    );
+    await tester.tap(stars.at(4));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Confirmer & noter').last);
+    await tester.pumpAndSettle();
+
+    // L'évaluation est affichée.
+    expect(find.text('VOTRE ÉVALUATION'), findsOneWidget);
+  });
+
+  testWidgets('artisan : chantier en validation + paiement en attente',
+      (tester) async {
+    await pumpApp(tester);
+    await tester.tap(find.text('Je suis artisan — créer mon profil pro'));
+    await tester.pumpAndSettle();
+
+    // Le dashboard montre les chantiers et le paiement en attente (d3 seedé).
+    expect(find.text('Chantiers en cours'), findsOneWidget);
+    expect(find.text('Paiement en attente'), findsOneWidget);
+    expect(
+      find.text('En attente de validation par l’administration'),
+      findsWidgets,
+    );
+  });
+
   testWidgets('mes devis : page dédiée avec 2 onglets', (tester) async {
     await pumpApp(tester);
     await tester.tap(find.text('Continuer'));

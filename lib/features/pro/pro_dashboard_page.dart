@@ -9,6 +9,7 @@ import '../../data/models/models.dart';
 import '../../providers/data_providers.dart';
 import '../../shared/widgets/widgets.dart';
 import 'widgets/demande_detail_sheet.dart';
+import 'widgets/pro_chantiers_card.dart';
 import 'widgets/pro_bars.dart';
 import 'widgets/pro_statut_badge.dart';
 
@@ -70,6 +71,9 @@ class ProDashboardPage extends ConsumerWidget {
                   ),
                 ],
               ),
+            // Chantiers acceptés : suivi de réalisation + paiement.
+            const SizedBox(height: TaDims.gap),
+            const ProChantiersCard(),
           ],
         );
       },

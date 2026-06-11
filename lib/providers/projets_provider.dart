@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/mock_data.dart';
@@ -40,6 +41,37 @@ class ProjetsNotifier extends Notifier<List<Projet>> {
     state = [
       for (final p in state)
         if (p.id == id) p.copyWith(statut: statut) else p,
+    ];
+  }
+
+  /// Le client confirme la bonne réalisation et note l'artisan.
+  /// Si l'artisan a déjà marqué terminé → passe en validation admin.
+  void confirmByClient(String id, {required int note, String? comment}) {
+    state = [
+      for (final p in state)
+        if (p.id == id)
+          p.copyWith(
+            clientNote: note,
+            clientComment: comment,
+            statut: p.artisanDone ? ProjetStatut.enValidation : p.statut,
+          )
+        else
+          p,
+    ];
+  }
+
+  /// L'artisan marque le travail comme terminé.
+  /// Si le client a déjà confirmé → passe en validation admin.
+  void markArtisanDone(String id) {
+    state = [
+      for (final p in state)
+        if (p.id == id)
+          p.copyWith(
+            artisanDone: true,
+            statut: p.clientConfirmed ? ProjetStatut.enValidation : p.statut,
+          )
+        else
+          p,
     ];
   }
 }
@@ -127,3 +159,44 @@ final devisForProjetProvider = Provider.family<List<DevisDoc>, String>(
       .where((d) => d.projetId == projetId)
       .toList(),
 );
+
+/// Devis accepté d'un projet (le chantier de l'artisan), s'il existe.
+final devisAccepteProvider = Provider.family<DevisDoc?, String>((
+  ref,
+  projetId,
+) {
+  for (final d in ref.watch(devisDocsProvider)) {
+    if (d.projetId == projetId && d.statut == DevisStatut.accepte) return d;
+  }
+  return null;
+});
+
+/// Chantier de l'artisan : un projet dont le devis a été accepté.
+@immutable
+class Chantier {
+  const Chantier({required this.projet, required this.devis});
+
+  final Projet projet;
+  final DevisDoc devis;
+}
+
+/// Chantiers de l'artisan (projets avec devis accepté), non terminés d'abord.
+final chantiersProvider = Provider<List<Chantier>>((ref) {
+  final projets = ref.watch(projetsProvider);
+  final accepte = ref
+      .watch(devisDocsProvider)
+      .where((d) => d.statut == DevisStatut.accepte);
+  final byId = {for (final p in projets) p.id: p};
+  return [
+    for (final d in accepte)
+      if (byId[d.projetId] case final p?) Chantier(projet: p, devis: d),
+  ]..sort((a, b) => a.projet.statut == ProjetStatut.termine ? 1 : 0);
+});
+
+/// Total des paiements en attente (chantiers en validation admin).
+final paiementEnAttenteProvider = Provider<int>((ref) {
+  return ref
+      .watch(chantiersProvider)
+      .where((c) => c.projet.statut == ProjetStatut.enValidation)
+      .fold(0, (sum, c) => sum + c.devis.total);
+});
