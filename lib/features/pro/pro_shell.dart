@@ -12,7 +12,9 @@ import '../../shared/widgets/widgets.dart';
 import 'pro_dashboard_page.dart';
 import 'pro_demandes_page.dart';
 import 'pro_nav.dart';
-import 'pro_placeholder_page.dart';
+import 'pro_messages_page.dart';
+import 'pro_profil_page.dart';
+import 'pro_realisations_page.dart';
 import 'widgets/pro_featured_card.dart';
 import 'widgets/pro_sidebar.dart';
 
@@ -131,13 +133,19 @@ class _ProShellState extends ConsumerState<ProShell> {
           child: ProDemandesPage(compact: mobile),
         );
       case ProPage.messages:
+        return SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(pad, pad, pad, bottomPad),
+          child: ProMessagesPage(compact: mobile),
+        );
       case ProPage.realisations:
+        return SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(pad, pad, pad, bottomPad),
+          child: ProRealisationsPage(compact: mobile),
+        );
       case ProPage.profil:
-        final item = proNavItems.firstWhere((i) => i.page == _page);
-        return ProPlaceholderPage(
-          icon: item.icon,
-          title: item.label,
-          onBack: () => _go(ProPage.dash),
+        return SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(pad, pad, pad, bottomPad),
+          child: ProProfilPage(compact: mobile),
         );
     }
   }

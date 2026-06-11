@@ -269,6 +269,27 @@ void main() {
     expect(find.textContaining('demandes · 2 nouvelles'), findsOneWidget);
   });
 
+  testWidgets('espace artisan : pages profil / photos / messages remplies',
+      (tester) async {
+    await pumpApp(tester);
+    await tester.tap(find.text('Je suis artisan — créer mon profil pro'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Profil').last);
+    await tester.pumpAndSettle();
+    expect(find.text('Modifier le profil'), findsOneWidget);
+    expect(find.text('COMPÉTENCES'), findsOneWidget);
+
+    await tester.tap(find.text('Photos').last);
+    await tester.pumpAndSettle();
+    expect(find.text('Ajouter une réalisation'), findsOneWidget);
+    expect(find.text('Salle de bain — Riviera 3'), findsOneWidget);
+
+    await tester.tap(find.text('Messages').last);
+    await tester.pumpAndSettle();
+    expect(find.text('Adjoua Bamba'), findsWidgets);
+  });
+
   testWidgets('espace artisan : sidebar sur tablette', (tester) async {
     tester.view.physicalSize = const Size(2360, 1708); // ~1180×854 logiques
     tester.view.devicePixelRatio = 2;
