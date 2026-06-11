@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import 'ta_tokens.dart';
+
+/// Police embarquée (assets/fonts) — garantie en release et hors-ligne,
+/// contrairement au téléchargement runtime de google_fonts.
+const kFontFamily = 'Plus Jakarta Sans';
 
 /// Styles de texte du design system (helpers `.ta-h1`, `.ta-h2`, `.ta-sub`, `.ta-label`).
 extension TaTextStyles on BuildContext {
@@ -51,6 +54,7 @@ abstract final class AppTheme {
     final base = ThemeData(
       useMaterial3: true,
       brightness: brightness,
+      fontFamily: kFontFamily,
       scaffoldBackgroundColor: tokens.bg,
       colorScheme: ColorScheme.fromSeed(
         seedColor: tokens.primary,
@@ -63,9 +67,11 @@ abstract final class AppTheme {
       highlightColor: Colors.transparent,
     );
 
-    final textTheme = GoogleFonts.plusJakartaSansTextTheme(
-      base.textTheme,
-    ).apply(bodyColor: tokens.text, displayColor: tokens.text);
+    final textTheme = base.textTheme.apply(
+      fontFamily: kFontFamily,
+      bodyColor: tokens.text,
+      displayColor: tokens.text,
+    );
 
     return base.copyWith(textTheme: textTheme, extensions: [tokens]);
   }
