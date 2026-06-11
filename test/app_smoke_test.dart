@@ -221,8 +221,10 @@ void main() {
     await tester.tap(find.text('Confirmer & noter').last);
     await tester.pumpAndSettle();
 
-    // L'évaluation est affichée.
-    expect(find.text('VOTRE ÉVALUATION'), findsOneWidget);
+    // Onglet « Note & avis » → la note est affichée.
+    await tester.tap(find.text('Note & avis'));
+    await tester.pumpAndSettle();
+    expect(find.text('VOTRE NOTE'), findsOneWidget);
   });
 
   testWidgets('artisan : chantier en validation + paiement en attente',
@@ -238,6 +240,26 @@ void main() {
       find.text('En attente de validation par l’administration'),
       findsWidgets,
     );
+  });
+
+  testWidgets('client : onglets preuves & note en validation', (tester) async {
+    await pumpApp(tester);
+    await tester.tap(find.text('Continuer'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Projets').first);
+    await tester.pumpAndSettle();
+
+    // Le projet « Rénovation plomberie » (d3) est en validation avec preuves.
+    await tester.tap(find.text('Rénovation plomberie salle de bain'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Preuves ('), findsOneWidget);
+    // Le label TaPhoto est rendu en majuscules.
+    expect(find.text('DOUCHE ITALIENNE POSÉE'), findsOneWidget);
+
+    // Onglet Note & avis.
+    await tester.tap(find.text('Note & avis'));
+    await tester.pumpAndSettle();
+    expect(find.text('VOTRE NOTE'), findsOneWidget);
   });
 
   testWidgets('mes devis : page dédiée avec 2 onglets', (tester) async {

@@ -12,6 +12,7 @@ import '../../data/models/models.dart';
 import '../../providers/data_providers.dart';
 import '../../providers/projets_provider.dart';
 import '../../shared/widgets/widgets.dart';
+import 'widgets/rate_projet_sheet.dart';
 
 /// Pastille de statut d'un projet (mappings partagés liste / détail).
 TaBadge projetStatutBadge(BuildContext context, ProjetStatut statut) {
@@ -461,6 +462,49 @@ class _ProjetCard extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           _ProjetProgress(statut: p.statut),
+          // ---- noter : travaux en cours non encore confirmés ----
+          if (p.statut == ProjetStatut.enCours && !p.clientConfirmed) ...[
+            const SizedBox(height: 12),
+            TaButton(
+              label: 'Confirmer & noter',
+              variant: TaButtonVariant.primary,
+              small: true,
+              expanded: true,
+              onPressed: () => showRateProjetSheet(context, projetId: p.id),
+              leading: TaIcon(
+                TaIcons.star,
+                size: 14,
+                mono: true,
+                color: TaButton.inkColor(context, TaButtonVariant.primary),
+              ),
+            ),
+          ],
+          // ---- évaluation déjà laissée ----
+          if (p.clientConfirmed) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+              decoration: BoxDecoration(
+                color: t.surface2,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                spacing: 8,
+                children: [
+                  Text(
+                    'Votre note',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: t.text2,
+                    ),
+                  ),
+                  const Spacer(),
+                  TaStars(note: p.clientNote!.toDouble(), size: 14),
+                ],
+              ),
+            ),
+          ],
           const TaDivider(margin: EdgeInsets.only(top: 12, bottom: 10)),
           // ---- pied : devis reçus + meilleur prix ----
           Row(

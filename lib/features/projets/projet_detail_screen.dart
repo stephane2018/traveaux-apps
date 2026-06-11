@@ -372,18 +372,25 @@ class _DevisCard extends ConsumerWidget {
 }
 
 /// Carte de suivi de réalisation côté client : confirmer & noter, puis
-/// statut de validation.
-class _SuiviCard extends StatelessWidget {
+/// onglets « Preuves de réalisation » / « Note & commentaires » en validation.
+class _SuiviCard extends StatefulWidget {
   const _SuiviCard({required this.projet});
 
   final Projet projet;
 
   @override
+  State<_SuiviCard> createState() => _SuiviCardState();
+}
+
+class _SuiviCardState extends State<_SuiviCard> {
+  int _tab = 0;
+
+  @override
   Widget build(BuildContext context) {
     final t = context.ta;
-    final p = projet;
+    final p = widget.projet;
 
-    // 1) Travaux en cours, pas encore confirmés par le client.
+    // 1) Travaux en cours, pas encore confirmés par le client → confirmer.
     if (p.statut == ProjetStatut.enCours && !p.clientConfirmed) {
       return TaCard(
         padding: const EdgeInsets.all(TaDims.pad),
@@ -439,79 +446,204 @@ class _SuiviCard extends StatelessWidget {
       );
     }
 
-    // 2) Le client a noté : afficher l'évaluation + l'état d'attente.
-    final enValidation = p.statut == ProjetStatut.enValidation;
+    // 2) Validé/terminé : bannière de statut + onglets preuves / note.
     return TaCard(
       padding: const EdgeInsets.all(TaDims.pad),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (p.clientConfirmed) ...[
-            Row(
-              children: [
-                Text('VOTRE ÉVALUATION', style: context.taLabel),
-                const Spacer(),
-                TaStars(note: p.clientNote!.toDouble(), size: 16),
-              ],
-            ),
-            if (p.clientComment != null) ...[
-              const SizedBox(height: 8),
+          _statusBanner(t, p),
+          const TaDivider(margin: EdgeInsets.symmetric(vertical: 14)),
+          TaSegmented<int>(
+            value: _tab,
+            expand: true,
+            activeShadow: true,
+            background: t.surface2,
+            activeBackground: t.surface,
+            activeForeground: t.text,
+            height: 36,
+            fontSize: TaDims.fsSm,
+            onChanged: (v) => setState(() => _tab = v),
+            options: [
+              TaSegmentOption(0, 'Preuves (${p.preuves.length})'),
+              const TaSegmentOption(1, 'Note & avis'),
+            ],
+          ),
+          const SizedBox(height: 14),
+          if (_tab == 0)
+            _PreuvesTab(preuves: p.preuves)
+          else
+            _NoteTab(projet: p),
+        ],
+      ),
+    );
+  }
+
+  Widget _statusBanner(TaTokens t, Projet p) {
+    final enValidation = p.statut == ProjetStatut.enValidation;
+    return Row(
+      spacing: 11,
+      children: [
+        TaIconBox(
+          icon: enValidation ? TaIcons.shield : TaIcons.check,
+          size: 42,
+          radius: 13,
+          iconSize: 20,
+          background: enValidation ? t.surface2 : t.primarySoft,
+        ),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
               Text(
-                '« ${p.clientComment!} »',
+                enValidation
+                    ? 'En attente de validation'
+                    : p.statut == ProjetStatut.termine
+                    ? 'Projet terminé'
+                    : 'Confirmé de votre côté',
                 style: TextStyle(
                   fontSize: TaDims.fsSm,
-                  fontWeight: FontWeight.w500,
-                  height: 1.5,
-                  fontStyle: FontStyle.italic,
-                  color: t.text2,
+                  fontWeight: FontWeight.w800,
+                  color: t.text,
                 ),
               ),
-            ],
-            const TaDivider(margin: EdgeInsets.symmetric(vertical: 14)),
-          ],
-          Row(
-            spacing: 11,
-            children: [
-              TaIconBox(
-                icon: enValidation ? TaIcons.shield : TaIcons.check,
-                size: 42,
-                radius: 13,
-                iconSize: 20,
-                background: enValidation ? t.surface2 : t.primarySoft,
-              ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      enValidation
-                          ? 'En attente de validation'
-                          : p.statut == ProjetStatut.termine
-                          ? 'Projet terminé'
-                          : 'Confirmé de votre côté',
-                      style: TextStyle(
-                        fontSize: TaDims.fsSm,
-                        fontWeight: FontWeight.w800,
-                        color: t.text,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      enValidation
-                          ? 'L’administration vérifie la réalisation avant de '
-                                'libérer le paiement.'
-                          : p.statut == ProjetStatut.termine
-                          ? 'Le paiement a été libéré à l’artisan.'
-                          : 'En attente de la confirmation de l’artisan.',
-                      style: context.taSub,
-                    ),
-                  ],
-                ),
+              const SizedBox(height: 2),
+              Text(
+                enValidation
+                    ? 'L’administration vérifie les preuves avant de libérer '
+                          'le paiement.'
+                    : p.statut == ProjetStatut.termine
+                    ? 'Le paiement a été libéré à l’artisan.'
+                    : 'En attente de la confirmation de l’artisan.',
+                style: context.taSub,
               ),
             ],
           ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Onglet « Preuves de réalisation » : grille de photos déposées par l'artisan.
+class _PreuvesTab extends StatelessWidget {
+  const _PreuvesTab({required this.preuves});
+
+  final List<String> preuves;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.ta;
+    if (preuves.isEmpty) {
+      return Column(
+        children: [
+          Opacity(
+            opacity: 0.55,
+            child: TaIcon(TaIcons.image, size: 30, mono: true, color: t.text3),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Aucune preuve déposée pour l’instant.',
+            style: context.taSub,
+            textAlign: TextAlign.center,
+          ),
         ],
-      ),
+      );
+    }
+    return Column(
+      children: [
+        for (var i = 0; i < preuves.length; i += 2) ...[
+          if (i > 0) const SizedBox(height: 9),
+          Row(
+            children: [
+              for (var j = i; j < i + 2; j++) ...[
+                if (j > i) const SizedBox(width: 9),
+                Expanded(
+                  child: j < preuves.length
+                      ? TaPhoto(
+                          label: preuves[j],
+                          height: 104,
+                          tone: j % 3,
+                          icon: TaIcons.image,
+                        )
+                      : const SizedBox.shrink(),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// Onglet « Note & avis » : note (étoiles) + commentaire du client.
+class _NoteTab extends StatelessWidget {
+  const _NoteTab({required this.projet});
+
+  final Projet projet;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.ta;
+    final p = projet;
+    if (!p.clientConfirmed) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            'Vous n’avez pas encore noté ce projet.',
+            style: context.taSub,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 12),
+          TaButton(
+            label: 'Confirmer & noter',
+            expanded: true,
+            small: true,
+            onPressed: () => showRateProjetSheet(context, projetId: p.id),
+            leading: TaIcon(
+              TaIcons.star,
+              size: 14,
+              mono: true,
+              color: TaButton.inkColor(context, TaButtonVariant.cta),
+            ),
+          ),
+        ],
+      );
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text('VOTRE NOTE', style: context.taLabel),
+            const Spacer(),
+            TaStars(note: p.clientNote!.toDouble(), size: 18),
+          ],
+        ),
+        if (p.clientComment != null) ...[
+          const SizedBox(height: 10),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: t.surface2,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              '« ${p.clientComment!} »',
+              style: TextStyle(
+                fontSize: TaDims.fsSm,
+                fontWeight: FontWeight.w500,
+                height: 1.5,
+                fontStyle: FontStyle.italic,
+                color: t.text2,
+              ),
+            ),
+          ),
+        ],
+      ],
     );
   }
 }

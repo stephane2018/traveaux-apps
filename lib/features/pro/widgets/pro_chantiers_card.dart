@@ -242,8 +242,9 @@ class _ChantierRow extends ConsumerWidget {
             variant: TaButtonVariant.primary,
             small: true,
             expanded: true,
-            onPressed: () =>
-                ref.read(projetsProvider.notifier).markArtisanDone(p.id),
+            onPressed: () => ref
+                .read(projetsProvider.notifier)
+                .markArtisanDone(p.id, preuves: kDefaultPreuves),
             leading: TaIcon(
               TaIcons.check,
               size: 14,

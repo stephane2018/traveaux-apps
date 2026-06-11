@@ -334,6 +334,7 @@ class Projet {
     this.artisanDone = false,
     this.clientNote,
     this.clientComment,
+    this.preuves = const [],
   });
 
   final String id;
@@ -353,6 +354,9 @@ class Projet {
   final int? clientNote;
   final String? clientComment;
 
+  /// Légendes des photos de preuve de réalisation (déposées par l'artisan).
+  final List<String> preuves;
+
   /// Le client a confirmé la bonne réalisation (et noté).
   bool get clientConfirmed => clientNote != null;
 
@@ -361,6 +365,7 @@ class Projet {
     bool? artisanDone,
     int? clientNote,
     String? clientComment,
+    List<String>? preuves,
   }) {
     return Projet(
       id: id,
@@ -375,6 +380,7 @@ class Projet {
       artisanDone: artisanDone ?? this.artisanDone,
       clientNote: clientNote ?? this.clientNote,
       clientComment: clientComment ?? this.clientComment,
+      preuves: preuves ?? this.preuves,
     );
   }
 }

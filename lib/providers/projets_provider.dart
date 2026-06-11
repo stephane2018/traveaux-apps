@@ -60,14 +60,15 @@ class ProjetsNotifier extends Notifier<List<Projet>> {
     ];
   }
 
-  /// L'artisan marque le travail comme terminé.
+  /// L'artisan marque le travail comme terminé et dépose des preuves.
   /// Si le client a déjà confirmé → passe en validation admin.
-  void markArtisanDone(String id) {
+  void markArtisanDone(String id, {List<String> preuves = const []}) {
     state = [
       for (final p in state)
         if (p.id == id)
           p.copyWith(
             artisanDone: true,
+            preuves: preuves.isEmpty ? p.preuves : preuves,
             statut: p.clientConfirmed ? ProjetStatut.enValidation : p.statut,
           )
         else
@@ -75,6 +76,14 @@ class ProjetsNotifier extends Notifier<List<Projet>> {
     ];
   }
 }
+
+/// Légendes de preuve par défaut (démo, l'upload réel viendra avec l'API).
+const kDefaultPreuves = [
+  'Vue d’ensemble',
+  'Détail des raccords',
+  'Zone traitée',
+  'Finitions',
+];
 
 final projetsProvider = NotifierProvider<ProjetsNotifier, List<Projet>>(
   ProjetsNotifier.new,

@@ -570,6 +570,12 @@ abstract final class MockData {
       artisanDone: true,
       clientNote: 5,
       clientComment: 'Travail impeccable, ponctuel et très propre. Merci !',
+      preuves: [
+        'Douche italienne posée',
+        'Double vasque installée',
+        'Raccords plomberie',
+        'Carrelage fini',
+      ],
     ),
     Projet(
       id: 'p3',
