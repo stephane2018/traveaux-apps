@@ -250,7 +250,10 @@ void main() {
     await tester.pumpAndSettle();
 
     // Le projet « Rénovation plomberie » (d3) est en validation avec preuves.
-    await tester.tap(find.text('Rénovation plomberie salle de bain'));
+    final cible = find.text('Rénovation plomberie salle de bain');
+    await tester.scrollUntilVisible(cible, 300);
+    await tester.pumpAndSettle();
+    await tester.tap(cible);
     await tester.pumpAndSettle();
     expect(find.textContaining('Preuves ('), findsOneWidget);
     // Le label TaPhoto est rendu en majuscules.

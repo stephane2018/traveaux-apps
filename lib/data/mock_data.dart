@@ -555,6 +555,20 @@ abstract final class MockData {
       statut: ProjetStatut.devisRecus,
     ),
     Projet(
+      id: 'd6',
+      titre: 'Pose d’un climatiseur au salon',
+      description:
+          'Installation d’un climatiseur split 1.5 CV au salon, avec '
+          'pose murale, raccordement et mise en service.',
+      cat: 'climatisation',
+      commune: 'Marcory',
+      urgence: 'Cette semaine',
+      budget: '150 000 – 250 000 F',
+      date: 'Il y a 2 jours',
+      // Devis accepté, travaux en cours : le client peut confirmer & noter.
+      statut: ProjetStatut.enCours,
+    ),
+    Projet(
       id: 'd3',
       titre: 'Rénovation plomberie salle de bain',
       description:
@@ -644,6 +658,25 @@ abstract final class MockData {
       ],
       date: 'Hier · 19:05',
       statut: DevisStatut.refuse,
+    ),
+    DevisDoc(
+      id: 'q4',
+      projetId: 'd6',
+      artisanId: 'a5',
+      titre: 'Pose climatiseur split 1.5 CV',
+      description:
+          'Fourniture et pose d’un split 1.5 CV, support mural, '
+          'liaison frigorifique et mise en service. Garantie 1 an.',
+      lignes: [
+        DevisLigne(label: 'Climatiseur split 1.5 CV', valeur: '135 000'),
+        DevisLigne(label: 'Main d’œuvre + pose', valeur: '45 000'),
+        DevisLigne(label: 'Liaison + accessoires', valeur: '20 000'),
+        DevisLigne(label: 'Mise en service', valeur: 'Incluse'),
+        DevisLigne(label: 'Garantie', valeur: '1 an'),
+      ],
+      date: 'Il y a 2 jours',
+      statut: DevisStatut.accepte,
+      rdv: 'Mercredi 18 juin · Après-midi',
     ),
   ];
 
