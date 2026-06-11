@@ -15,6 +15,19 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  testWidgets('typographie : police Plus Jakarta Sans embarquée',
+      (tester) async {
+    await pumpApp(tester);
+    // Le thème doit résoudre la police embarquée (pas le fallback système).
+    final ctx = tester.element(find.byType(Scaffold).first);
+    expect(Theme.of(ctx).textTheme.bodyMedium?.fontFamily, 'Plus Jakarta Sans');
+    final wordmark = tester.widget<Text>(find.text('Connexion ou inscription'));
+    final resolved = DefaultTextStyle.of(
+      tester.element(find.text('Connexion ou inscription')),
+    ).style.merge(wordmark.style);
+    expect(resolved.fontFamily, 'Plus Jakarta Sans');
+  });
+
   testWidgets('splash puis onboarding', (tester) async {
     tester.view.physicalSize = const Size(1206, 2622);
     tester.view.devicePixelRatio = 3;
