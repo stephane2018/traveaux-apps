@@ -51,7 +51,9 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
   Widget build(BuildContext context) {
     final list = ref.watch(filteredArtisansProvider);
     return TaStatusBar(
+      forceLight: true,
       child: Scaffold(
+        backgroundColor: context.ta.bg,
         body: Column(
           children: [
             const _ResultsHeader(),
@@ -104,93 +106,102 @@ class _ResultsHeader extends ConsumerWidget {
       if (c.id == filter.cat) catLabel = c.label;
     }
 
-    return Container(
-      padding: EdgeInsets.only(
-        top: MediaQuery.paddingOf(context).top + 16,
-        bottom: 12,
-      ),
-      decoration: BoxDecoration(
-        color: t.surface,
-        border: Border(bottom: BorderSide(color: t.border)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: TaDims.pad),
-            child: Row(
-              spacing: 10,
-              children: [
-                TaSquareButton.back(context, onTap: () => context.go('/home')),
-                Expanded(child: _searchField(t, catLabel)),
-                TaSquareButton(
-                  onTap: () {},
-                  background: t.primary,
-                  child: TaIcon(
-                    TaIcons.sort,
-                    size: 17,
-                    mono: true,
-                    color: t.primaryInk,
-                  ),
-                ),
-              ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // ----- barre du haut sur en-tête vert arrondi -----
+        Container(
+          padding: EdgeInsets.fromLTRB(
+            TaDims.pad,
+            MediaQuery.paddingOf(context).top + 16,
+            TaDims.pad,
+            18,
+          ),
+          decoration: BoxDecoration(
+            gradient: t.headerGrad,
+            borderRadius: const BorderRadius.vertical(
+              bottom: Radius.circular(26),
             ),
           ),
-          const SizedBox(height: 12),
-          _chipsScroll([
+          child: Row(
+            spacing: 10,
+            children: [
+              TaSquareButton(
+                background: Colors.white.withValues(alpha: 0.16),
+                onTap: () => context.go('/home'),
+                child: TaIcon(
+                  TaIcons.arrowLeft,
+                  size: 17,
+                  mono: true,
+                  color: t.headerInk,
+                ),
+              ),
+              Expanded(child: _searchField(t, catLabel)),
+              TaSquareButton(
+                onTap: () {},
+                background: Colors.white.withValues(alpha: 0.16),
+                child: TaIcon(
+                  TaIcons.sort,
+                  size: 17,
+                  mono: true,
+                  color: t.headerInk,
+                ),
+              ),
+            ],
+          ),
+        ),
+        // ----- filtres (sur le fond, sous l'en-tête) -----
+        const SizedBox(height: 14),
+        _chipsScroll([
+          TaChip(
+            label: 'Tous',
+            active: filter.cat == 'all',
+            onTap: () => notifier.setCat('all'),
+          ),
+          for (final c in categories.take(6))
             TaChip(
-              label: 'Tous',
-              active: filter.cat == 'all',
-              onTap: () => notifier.setCat('all'),
+              label: c.label,
+              active: filter.cat == c.id,
+              onTap: () => notifier.setCat(c.id),
+              icon: TaIcon(
+                c.icon,
+                size: 13,
+                mono: filter.cat == c.id,
+                color: t.primaryInk,
+              ),
             ),
-            for (final c in categories.take(6))
-              TaChip(
-                label: c.label,
-                active: filter.cat == c.id,
-                onTap: () => notifier.setCat(c.id),
-                icon: TaIcon(
-                  c.icon,
-                  size: 13,
-                  mono: filter.cat == c.id,
-                  color: t.primaryInk,
-                ),
-              ),
-          ]),
-          const SizedBox(height: 8),
-          _chipsScroll([
-            for (final co in ['Toutes', ...communes.take(6)])
-              TaChip(
-                label: co,
-                active: filter.commune == co,
-                onTap: () => notifier.setCommune(co),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                icon: co == 'Toutes'
-                    ? null
-                    : TaIcon(
-                        TaIcons.mapPin,
-                        size: 12,
-                        mono: filter.commune == co,
-                        color: t.primaryInk,
-                      ),
-              ),
-          ]),
-        ],
-      ),
+        ]),
+        const SizedBox(height: 8),
+        _chipsScroll([
+          for (final co in ['Toutes', ...communes.take(6)])
+            TaChip(
+              label: co,
+              active: filter.commune == co,
+              onTap: () => notifier.setCommune(co),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              icon: co == 'Toutes'
+                  ? null
+                  : TaIcon(
+                      TaIcons.mapPin,
+                      size: 12,
+                      mono: filter.commune == co,
+                      color: t.primaryInk,
+                    ),
+            ),
+        ]),
+      ],
     );
   }
 
-  /// Faux champ de recherche affichant la catégorie active.
+  /// Faux champ de recherche affichant la catégorie active (carte blanche).
   Widget _searchField(TaTokens t, String catLabel) {
     return Container(
-      height: 42,
+      height: 44,
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
-        color: t.bg,
+        color: t.surface,
         borderRadius: BorderRadius.circular(TaDims.rPill),
-        border: Border.all(color: t.borderStrong, width: 1.5),
+        boxShadow: t.shadowCard,
       ),
       child: Row(
         spacing: 8,

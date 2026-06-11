@@ -9,7 +9,6 @@ import '../../data/models/models.dart';
 import '../../providers/data_providers.dart';
 import '../../providers/projets_provider.dart';
 import '../../shared/widgets/widgets.dart';
-import 'projets_screen.dart' show projetStatutBadge;
 import 'widgets/devis_detail_sheet.dart';
 
 /// Détail d'un projet client : description, méta et devis reçus.
@@ -28,57 +27,15 @@ class ProjetDetailScreen extends ConsumerWidget {
       );
     }
     final devis = ref.watch(devisForProjetProvider(projetId));
-    final topPad = MediaQuery.paddingOf(context).top;
 
     return TaStatusBar(
+      forceLight: true,
       child: Scaffold(
+        backgroundColor: t.bg,
         body: Column(
           children: [
-            // ----- en-tête -----
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.fromLTRB(
-                TaDims.pad,
-                topPad + 16,
-                TaDims.pad,
-                12,
-              ),
-              decoration: BoxDecoration(
-                color: t.surface,
-                border: Border(bottom: BorderSide(color: t.border)),
-              ),
-              child: Row(
-                spacing: 10,
-                children: [
-                  TaSquareButton.back(context, onTap: () => context.pop()),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          projet.titre,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w800,
-                            color: t.text,
-                          ),
-                        ),
-                        Text(
-                          '${projet.commune} · ${projet.urgence}',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: context.taSub,
-                        ),
-                      ],
-                    ),
-                  ),
-                  projetStatutBadge(context, projet.statut),
-                ],
-              ),
-            ),
-            // ----- corps -----
+            _ProjetHeader(projet: projet),
+            // ----- corps : devis reçus -----
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(
@@ -91,7 +48,6 @@ class ProjetDetailScreen extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   spacing: TaDims.gap,
                   children: [
-                    _DescriptionCard(projet: projet),
                     TaSectionHead(title: 'Devis reçus (${devis.length})'),
                     if (devis.isEmpty)
                       const _WaitingCard()
@@ -108,63 +64,198 @@ class ProjetDetailScreen extends ConsumerWidget {
   }
 }
 
-/// Carte description + méta (commune, urgence, budget).
-class _DescriptionCard extends StatelessWidget {
-  const _DescriptionCard({required this.projet});
+/// En-tête vert à bas arrondi : retour, statut, titre, description et méta.
+class _ProjetHeader extends ConsumerWidget {
+  const _ProjetHeader({required this.projet});
 
   final Projet projet;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final t = context.ta;
-    return TaCard(
-      padding: const EdgeInsets.all(TaDims.pad),
+    final categories = ref.watch(categoriesProvider);
+    var catLabel = 'Travaux';
+    for (final c in categories) {
+      if (c.id == projet.cat) catLabel = c.label;
+    }
+
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.fromLTRB(
+        TaDims.pad,
+        MediaQuery.paddingOf(context).top + 16,
+        TaDims.pad,
+        20,
+      ),
+      decoration: BoxDecoration(
+        gradient: t.headerGrad,
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(26)),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('DESCRIPTION', style: context.taLabel),
-          const SizedBox(height: 7),
+          Row(
+            children: [
+              TaSquareButton(
+                background: Colors.white.withValues(alpha: 0.16),
+                onTap: () => context.pop(),
+                child: TaIcon(
+                  TaIcons.arrowLeft,
+                  size: 17,
+                  mono: true,
+                  color: t.headerInk,
+                ),
+              ),
+              const Spacer(),
+              _HeaderStatut(statut: projet.statut),
+            ],
+          ),
+          const SizedBox(height: 14),
           Text(
-            projet.description,
+            projet.titre,
             style: TextStyle(
-              fontSize: TaDims.fsSm,
-              fontWeight: FontWeight.w500,
-              height: 1.6,
-              color: t.text2,
+              color: t.headerInk,
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.44,
+              height: 1.2,
             ),
           ),
-          const TaDivider(margin: EdgeInsets.symmetric(vertical: 12)),
-          Column(
-            spacing: 10,
-            children: [
-              _metaRow(t, TaIcons.mapPin, projet.commune),
-              _metaRow(t, TaIcons.clock, projet.urgence),
-              _metaRow(t, TaIcons.wallet, projet.budget),
-            ],
+          const SizedBox(height: 4),
+          Text(
+            '$catLabel · ${projet.commune} · ${projet.date}',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: t.headerInk2,
+              fontSize: TaDims.fsSm,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 14),
+          // ----- panneau translucide : description + méta -----
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'DESCRIPTION',
+                  style: TextStyle(
+                    color: t.headerInk2,
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.8,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  projet.description,
+                  style: TextStyle(
+                    color: t.headerInk,
+                    fontSize: TaDims.fsSm,
+                    fontWeight: FontWeight.w500,
+                    height: 1.55,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  height: 1,
+                  color: Colors.white.withValues(alpha: 0.15),
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 7,
+                  runSpacing: 7,
+                  children: [
+                    _MetaChip(icon: TaIcons.clock, label: projet.urgence),
+                    _MetaChip(icon: TaIcons.wallet, label: projet.budget),
+                  ],
+                ),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _metaRow(TaTokens t, TaIcons icon, String label) {
-    return Row(
-      spacing: 8,
-      children: [
-        TaIcon(icon, size: 14, mono: true, color: t.text3),
-        Flexible(
-          child: Text(
+/// Pastille de statut sur l'en-tête vert : carte blanche, texte coloré.
+class _HeaderStatut extends StatelessWidget {
+  const _HeaderStatut({required this.statut});
+
+  final ProjetStatut statut;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.ta;
+    final (String label, Color color, TaIcons icon) = switch (statut) {
+      ProjetStatut.enAttente => ('En attente', t.text2, TaIcons.clock),
+      ProjetStatut.devisRecus => ('Devis reçus', t.accentStrong, TaIcons.doc),
+      ProjetStatut.enCours => ('En cours', t.primary, TaIcons.wrench),
+      ProjetStatut.termine => ('Terminé', t.primaryStrong, TaIcons.check),
+    };
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(TaDims.rPill),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        spacing: 4,
+        children: [
+          TaIcon(icon, size: 12, mono: true, color: color),
+          Text(
             label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              fontSize: 12.5,
-              fontWeight: FontWeight.w600,
-              color: t.text2,
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              color: color,
             ),
           ),
-        ),
-      ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Puce méta translucide de l'en-tête (urgence, budget).
+class _MetaChip extends StatelessWidget {
+  const _MetaChip({required this.icon, required this.label});
+
+  final TaIcons icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.ta;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(TaDims.rPill),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        spacing: 6,
+        children: [
+          TaIcon(icon, size: 13, mono: true, color: t.headerInk),
+          Text(
+            label,
+            style: TextStyle(
+              color: t.headerInk,
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
