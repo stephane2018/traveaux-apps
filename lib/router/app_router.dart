@@ -12,7 +12,11 @@ import '../features/profile/artisan_profile_screen.dart';
 import '../features/projets/projet_detail_screen.dart';
 import '../features/projets/mes_devis_screen.dart';
 import '../features/projets/projets_screen.dart';
+import '../features/pro/notifications_screen.dart';
+import '../features/pro/pro_chat_screen.dart';
 import '../features/pro/pro_shell.dart';
+import '../features/pro/profil_edit_screen.dart';
+import '../features/pro/realisation_detail_screen.dart';
 import '../features/results/results_screen.dart';
 import '../features/splash/splash_screen.dart';
 import '../features/wallet/wallet_screen.dart';
@@ -142,6 +146,36 @@ GoRouter createAppRouter() {
         parentNavigatorKey: rootNavigatorKey,
         pageBuilder: (context, state) =>
             taPage(state: state, child: const ProShell()),
+      ),
+      GoRoute(
+        path: '/pro/chat/:id',
+        parentNavigatorKey: rootNavigatorKey,
+        pageBuilder: (context, state) => taPage(
+          state: state,
+          child: ProChatScreen(conversationId: state.pathParameters['id']!),
+        ),
+      ),
+      GoRoute(
+        path: '/pro/realisation/:id',
+        parentNavigatorKey: rootNavigatorKey,
+        pageBuilder: (context, state) => taPage(
+          state: state,
+          child: RealisationDetailScreen(
+            realisationId: state.pathParameters['id']!,
+          ),
+        ),
+      ),
+      GoRoute(
+        path: '/pro/profil/edit',
+        parentNavigatorKey: rootNavigatorKey,
+        pageBuilder: (context, state) =>
+            taPage(state: state, child: const ProfilEditScreen()),
+      ),
+      GoRoute(
+        path: '/pro/notifications',
+        parentNavigatorKey: rootNavigatorKey,
+        pageBuilder: (context, state) =>
+            taPage(state: state, child: const NotificationsScreen()),
       ),
     ],
   );

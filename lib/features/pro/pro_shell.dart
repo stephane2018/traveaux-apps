@@ -7,6 +7,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/theme/ta_tokens.dart';
 import '../../providers/data_providers.dart';
+import '../../providers/pro_messages_provider.dart';
 import '../../providers/wallet_provider.dart';
 import '../../shared/widgets/widgets.dart';
 import 'pro_dashboard_page.dart';
@@ -64,6 +65,7 @@ class _ProShellState extends ConsumerState<ProShell> {
   // ───── Mobile : en-tête vert + contenu + barre d'onglets ─────
   Widget _mobileLayout(BuildContext context) {
     final t = context.ta;
+    final unread = ref.watch(proUnreadProvider);
     return TaStatusBar(
       forceLight: true,
       child: Scaffold(
@@ -90,7 +92,9 @@ class _ProShellState extends ConsumerState<ProShell> {
                     TaTabItem(
                       icon: item.icon,
                       label: item.shortLabel,
-                      showDot: (item.badge ?? 0) > 0,
+                      showDot: item.page == ProPage.messages
+                          ? unread > 0
+                          : (item.badge ?? 0) > 0,
                     ),
                 ],
               ),
@@ -207,7 +211,7 @@ class _MobileProHeader extends ConsumerWidget {
               ),
               const _WalletPill(),
               _HeaderAction(
-                onTap: () {},
+                onTap: () => context.push('/pro/notifications'),
                 showDot: true,
                 child: TaIcon(
                   TaIcons.bell,

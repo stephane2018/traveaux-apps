@@ -247,24 +247,129 @@ abstract final class MockData {
       titre: 'Salle de bain — Riviera 3',
       type: 'Rénovation complète',
       duree: '5 jours',
+      commune: 'Cocody',
+      description:
+          'Rénovation complète d’une salle de bain : dépose de l’ancienne '
+          'tuyauterie, pose d’une douche italienne, double vasque et '
+          'carrelage. Étanchéité refaite à neuf.',
     ),
     Realisation(
       id: 'p2',
       titre: 'Chauffe-eau — Angré',
       type: 'Installation',
       duree: '1 jour',
+      commune: 'Cocody',
+      description:
+          'Installation d’un chauffe-eau électrique 100 L avec groupe de '
+          'sécurité et raccordement aux normes.',
     ),
     Realisation(
       id: 'p3',
       titre: 'Plomberie villa — Bingerville',
       type: 'Construction neuve',
       duree: '3 semaines',
+      commune: 'Bingerville',
+      description:
+          'Plomberie complète d’une villa neuve : alimentation, évacuations, '
+          'sanitaires de 3 salles d’eau et cuisine.',
     ),
     Realisation(
       id: 'p4',
       titre: 'Fuite encastrée — II Plateaux',
       type: 'Détection + réparation',
       duree: '2 jours',
+      commune: 'Cocody',
+      description:
+          'Détection d’une fuite encastrée par caméra thermique, ouverture '
+          'ciblée du mur, réparation et remise en état.',
+    ),
+  ];
+
+  static const proConversations = [
+    ProConversation(
+      id: 'pc1',
+      client: 'Adjoua Bamba',
+      projet: 'Fuite sous évier de cuisine',
+      last: 'D’accord, à demain matin alors. Merci !',
+      time: '15:10',
+      unread: 2,
+      messages: [
+        ChatMessage(
+          from: MessageAuthor.them,
+          time: '13:40',
+          text: 'Bonjour, j’ai une fuite sous l’évier, pouvez-vous passer ?',
+        ),
+        ChatMessage(
+          from: MessageAuthor.me,
+          time: '14:02',
+          text: 'Bonjour ! Oui, je peux passer demain à 9 h. Pouvez-vous '
+              'm’envoyer une photo ?',
+        ),
+        ChatMessage(
+          from: MessageAuthor.them,
+          time: '14:20',
+          type: MessageType.photo,
+          text: 'Photo de la fuite',
+        ),
+        ChatMessage(
+          from: MessageAuthor.them,
+          time: '14:21',
+          text: 'Voilà. C’est urgent, le placard gonfle.',
+        ),
+        ChatMessage(
+          from: MessageAuthor.me,
+          time: '15:05',
+          text: 'Je vous prépare un devis et je passe demain à 9 h.',
+        ),
+        ChatMessage(
+          from: MessageAuthor.them,
+          time: '15:10',
+          text: 'D’accord, à demain matin alors. Merci !',
+        ),
+      ],
+    ),
+    ProConversation(
+      id: 'pc2',
+      client: 'Éric Kouamé',
+      projet: 'Installation de 2 chauffe-eau',
+      last: 'Le devis vous convient-il ?',
+      time: 'Hier',
+      unread: 1,
+      messages: [
+        ChatMessage(
+          from: MessageAuthor.me,
+          time: 'Hier · 10:00',
+          text: 'Bonjour, voici mon devis pour les 2 chauffe-eau.',
+        ),
+        ChatMessage(
+          from: MessageAuthor.me,
+          time: 'Hier · 10:01',
+          type: MessageType.devis,
+          titre: 'Installation 2 chauffe-eau 50 L',
+          montant: 150000,
+          delai: 'Sous 3 jours',
+        ),
+        ChatMessage(
+          from: MessageAuthor.them,
+          time: 'Hier · 18:30',
+          text: 'Le devis vous convient-il ?',
+        ),
+      ],
+    ),
+    ProConversation(
+      id: 'pc3',
+      client: 'Mariam Ouattara',
+      projet: 'Rénovation plomberie SDB',
+      last: 'Parfait, merci pour votre intervention !',
+      time: 'Lun.',
+      unread: 0,
+      messages: [
+        ChatMessage(
+          from: MessageAuthor.them,
+          time: 'Lun. · 16:00',
+          text: 'Parfait, merci pour votre intervention !',
+        ),
+      ],
     ),
   ];
 

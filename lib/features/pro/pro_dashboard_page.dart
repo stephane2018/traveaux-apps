@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/ta_tokens.dart';
@@ -166,7 +167,7 @@ class _BellButton extends StatelessWidget {
           radius: 13,
           background: t.surface,
           borderColor: t.borderStrong,
-          onTap: () {},
+          onTap: () => context.push('/pro/notifications'),
           child: const TaIcon(TaIcons.bell, size: 19),
         ),
         Positioned(

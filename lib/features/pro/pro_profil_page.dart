@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/ta_tokens.dart';
@@ -7,6 +8,7 @@ import '../../core/utils/formatters.dart';
 import '../../data/models/models.dart';
 import '../../providers/data_providers.dart';
 import '../../shared/widgets/widgets.dart';
+import 'widgets/public_preview_sheet.dart';
 
 /// Page « Mon profil » de l'espace artisan : fiche publique éditable.
 class ProProfilPage extends ConsumerWidget {
@@ -16,7 +18,7 @@ class ProProfilPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final me = ref.watch(artisansProvider).first;
+    final me = ref.watch(proProfileProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -113,7 +115,7 @@ class _IdentityCard extends StatelessWidget {
                   label: 'Modifier le profil',
                   variant: TaButtonVariant.primary,
                   small: true,
-                  onPressed: () {},
+                  onPressed: () => context.push('/pro/profil/edit'),
                   leading: TaIcon(
                     TaIcons.settings,
                     size: 14,
@@ -127,7 +129,7 @@ class _IdentityCard extends StatelessWidget {
                   label: 'Aperçu public',
                   variant: TaButtonVariant.outline,
                   small: true,
-                  onPressed: () {},
+                  onPressed: () => showPublicPreviewSheet(context),
                   leading: const TaIcon(TaIcons.eye, size: 14),
                 ),
               ),

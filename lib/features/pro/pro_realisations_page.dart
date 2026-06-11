@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/ta_tokens.dart';
 import '../../data/models/models.dart';
 import '../../providers/data_providers.dart';
 import '../../shared/widgets/widgets.dart';
+import 'widgets/add_realisation_sheet.dart';
 
 /// Page « Réalisations » de l'espace artisan : galerie avant/après.
 class ProRealisationsPage extends ConsumerWidget {
@@ -82,7 +84,7 @@ class _Header extends StatelessWidget {
           variant: TaButtonVariant.primary,
           height: 42,
           fontSize: TaDims.fsSm,
-          onPressed: () {},
+          onPressed: () => showAddRealisationSheet(context),
           leading: TaIcon(
             TaIcons.plus,
             size: 15,
@@ -103,7 +105,7 @@ class _AddCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.ta;
     return TaCard(
-      onTap: () {},
+      onTap: () => showAddRealisationSheet(context),
       color: t.surface,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
@@ -157,7 +159,7 @@ class _RealisationCard extends StatelessWidget {
     final t = context.ta;
     final p = realisation;
     return TaCard(
-      onTap: () {},
+      onTap: () => context.push('/pro/realisation/${realisation.id}'),
       padding: const EdgeInsets.all(10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

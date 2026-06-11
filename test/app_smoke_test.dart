@@ -290,6 +290,43 @@ void main() {
     expect(find.text('Adjoua Bamba'), findsWidgets);
   });
 
+  testWidgets('espace artisan : chat client + notifications', (tester) async {
+    await pumpApp(tester);
+    await tester.tap(find.text('Je suis artisan — créer mon profil pro'));
+    await tester.pumpAndSettle();
+
+    // Onglet Messages → conversation avec un client.
+    await tester.tap(find.text('Messages').last);
+    await tester.pumpAndSettle();
+    expect(find.text('Adjoua Bamba'), findsWidgets);
+    await tester.tap(find.text('Adjoua Bamba').first);
+    await tester.pumpAndSettle();
+    expect(find.text('En ligne'), findsOneWidget);
+
+    // Retour, puis cloche → page Notifications.
+    await tester.tap(find.byWidgetPredicate(
+      (w) => w is TaIcon && w.icon == TaIcons.arrowLeft,
+    ).first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byWidgetPredicate(
+      (w) => w is TaIcon && w.icon == TaIcons.bell,
+    ).first);
+    await tester.pumpAndSettle();
+    expect(find.text('Notifications'), findsOneWidget);
+  });
+
+  testWidgets('espace artisan : édition du profil', (tester) async {
+    await pumpApp(tester);
+    await tester.tap(find.text('Je suis artisan — créer mon profil pro'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Profil').last);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Modifier le profil'));
+    await tester.pumpAndSettle();
+    expect(find.text('Enregistrer'), findsOneWidget);
+  });
+
   testWidgets('espace artisan : sidebar sur tablette', (tester) async {
     tester.view.physicalSize = const Size(2360, 1708); // ~1180×854 logiques
     tester.view.devicePixelRatio = 2;

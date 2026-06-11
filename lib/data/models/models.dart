@@ -60,6 +60,38 @@ class Artisan {
   final List<String> skills;
 
   String get initials => name.split(' ').map((w) => w[0]).take(2).join();
+
+  Artisan copyWith({
+    String? name,
+    String? metier,
+    String? commune,
+    String? quartier,
+    String? dispo,
+    int? prix,
+    String? bio,
+    List<String>? skills,
+  }) {
+    return Artisan(
+      id: id,
+      name: name ?? this.name,
+      metier: metier ?? this.metier,
+      cat: cat,
+      commune: commune ?? this.commune,
+      quartier: quartier ?? this.quartier,
+      note: note,
+      avis: avis,
+      jobs: jobs,
+      annees: annees,
+      verified: verified,
+      featured: featured,
+      dispo: dispo ?? this.dispo,
+      prix: prix ?? this.prix,
+      c1: c1,
+      c2: c2,
+      bio: bio ?? this.bio,
+      skills: skills ?? this.skills,
+    );
+  }
 }
 
 @immutable
@@ -90,12 +122,16 @@ class Realisation {
     required this.titre,
     required this.type,
     required this.duree,
+    this.description = '',
+    this.commune = '',
   });
 
   final String id;
   final String titre;
   final String type;
   final String duree;
+  final String description;
+  final String commune;
 }
 
 enum MessageAuthor { me, them }
@@ -155,6 +191,45 @@ class Conversation {
       unread: unread ?? this.unread,
       last: last ?? this.last,
       time: time ?? this.time,
+      messages: messages ?? this.messages,
+    );
+  }
+}
+
+/// Conversation côté artisan (avec un client). « me » = l'artisan.
+@immutable
+class ProConversation {
+  const ProConversation({
+    required this.id,
+    required this.client,
+    required this.projet,
+    required this.last,
+    required this.time,
+    required this.unread,
+    this.messages = const [],
+  });
+
+  final String id;
+  final String client;
+  final String projet;
+  final String last;
+  final String time;
+  final int unread;
+  final List<ChatMessage> messages;
+
+  ProConversation copyWith({
+    String? last,
+    String? time,
+    int? unread,
+    List<ChatMessage>? messages,
+  }) {
+    return ProConversation(
+      id: id,
+      client: client,
+      projet: projet,
+      last: last ?? this.last,
+      time: time ?? this.time,
+      unread: unread ?? this.unread,
       messages: messages ?? this.messages,
     );
   }

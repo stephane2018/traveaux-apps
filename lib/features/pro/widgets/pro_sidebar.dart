@@ -6,6 +6,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/theme/ta_tokens.dart';
 import '../../../providers/data_providers.dart';
+import '../../../providers/pro_messages_provider.dart';
 import '../../../providers/wallet_provider.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../pro_nav.dart';
@@ -53,6 +54,10 @@ class ProSidebar extends ConsumerWidget {
                         _NavButton(
                           item: item,
                           active: page == item.page,
+                          // Messages : badge dynamique = non-lus.
+                          badge: item.page == ProPage.messages
+                              ? ref.watch(proUnreadProvider)
+                              : item.badge,
                           onTap: () => onSelect(item.page),
                         ),
                     ],
@@ -229,11 +234,13 @@ class _NavButton extends StatelessWidget {
     required this.item,
     required this.active,
     required this.onTap,
+    this.badge,
   });
 
   final ProNavItem item;
   final bool active;
   final VoidCallback onTap;
+  final int? badge;
 
   @override
   Widget build(BuildContext context) {
@@ -261,7 +268,7 @@ class _NavButton extends StatelessWidget {
                 ),
               ),
             ),
-            if (item.badge != null) TaUnreadBadge(count: item.badge!),
+            if ((badge ?? 0) > 0) TaUnreadBadge(count: badge!),
           ],
         ),
       ),

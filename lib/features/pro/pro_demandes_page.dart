@@ -23,27 +23,19 @@ class ProDemandesPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final demandes = ref.watch(demandesProvider);
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final narrow = constraints.maxWidth < 640;
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (compact)
-              _compactHeader(context, demandes.length)
-            else
-              _fullHeader(context, demandes.length),
-            const SizedBox(height: 18),
-            Column(
-              spacing: TaDims.gap,
-              children: [
-                for (final d in demandes)
-                  _DemandeCard(demande: d, narrow: narrow),
-              ],
-            ),
-          ],
-        );
-      },
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (compact)
+          _compactHeader(context, demandes.length)
+        else
+          _fullHeader(context, demandes.length),
+        const SizedBox(height: 18),
+        Column(
+          spacing: TaDims.gap,
+          children: [for (final d in demandes) _DemandeCard(demande: d)],
+        ),
+      ],
     );
   }
 
@@ -92,124 +84,119 @@ class ProDemandesPage extends ConsumerWidget {
   ];
 }
 
-/// Carte d'une demande : avatar, projet + méta, actions selon le statut.
+/// Carte d'une demande : bandeau client + statut, projet, méta, actions.
 class _DemandeCard extends StatelessWidget {
-  const _DemandeCard({required this.demande, required this.narrow});
+  const _DemandeCard({required this.demande});
 
   final Demande demande;
-  final bool narrow;
 
   @override
   Widget build(BuildContext context) {
-    final info = _DemandeInfo(demande: demande);
-    final actions = _DemandeActions(demande: demande);
+    final t = context.ta;
+    final d = demande;
     return TaCard(
-      padding: const EdgeInsets.all(18),
-      onTap: () => showDemandeDetailSheet(context, demande: demande),
-      child: narrow
-          // Largeur étroite : les actions passent sous le contenu.
-          ? Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  spacing: 16,
+      padding: const EdgeInsets.all(16),
+      onTap: () => showDemandeDetailSheet(context, demande: d),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Bandeau haut : avatar + nom/commune, puis statut + date à droite.
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 12,
+            children: [
+              TaClientAvatar(name: d.client, size: 44),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    TaClientAvatar(name: demande.client, size: 46),
-                    Expanded(child: info),
+                    Text(
+                      d.client,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.w800,
+                        color: t.text,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Row(
+                      spacing: 4,
+                      children: [
+                        TaIcon(
+                          TaIcons.mapPin,
+                          size: 12,
+                          mono: true,
+                          color: t.text3,
+                        ),
+                        Flexible(
+                          child: Text(
+                            d.commune,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: context.taSub.copyWith(fontSize: 12),
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
-                const SizedBox(height: 12),
-                actions,
-              ],
-            )
-          : Row(
-              spacing: 16,
-              children: [
-                TaClientAvatar(name: demande.client, size: 46),
-                Expanded(child: info),
-                actions,
-              ],
-            ),
-    );
-  }
-}
-
-class _DemandeInfo extends StatelessWidget {
-  const _DemandeInfo({required this.demande});
-
-  final Demande demande;
-
-  @override
-  Widget build(BuildContext context) {
-    final t = context.ta;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Wrap(
-          spacing: 8,
-          runSpacing: 4,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            Text(
-              demande.projet,
-              style: TextStyle(
-                fontWeight: FontWeight.w800,
-                fontSize: 14.5,
-                color: t.text,
               ),
-            ),
-            ProStatutBadge(statut: demande.statut),
-            if (demande.urgence == 'Urgent')
-              TaBadge(
-                label: 'Urgent',
-                background: t.danger,
-                foreground: Colors.white,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  ProStatutBadge(statut: d.statut),
+                  const SizedBox(height: 5),
+                  Text(
+                    d.date,
+                    style: context.taSub.copyWith(fontSize: 11, color: t.text3),
+                  ),
+                ],
               ),
-          ],
-        ),
-        const SizedBox(height: 6),
-        Wrap(
-          spacing: 14,
-          runSpacing: 6,
-          children: [
-            _Meta(icon: TaIcons.user, value: demande.client),
-            _Meta(icon: TaIcons.mapPin, value: demande.commune),
-            _Meta(icon: TaIcons.wallet, value: demande.budget),
-            _Meta(icon: TaIcons.clock, value: demande.date),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _Meta extends StatelessWidget {
-  const _Meta({required this.icon, required this.value});
-
-  final TaIcons icon;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    final t = context.ta;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      spacing: 4,
-      children: [
-        TaIcon(icon, size: 13, mono: true, color: t.text3),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: t.text2,
+            ],
           ),
-        ),
-      ],
+          const TaDivider(margin: EdgeInsets.symmetric(vertical: 12)),
+          // Projet.
+          Text(
+            d.projet,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              height: 1.35,
+              color: t.text,
+            ),
+          ),
+          // Puces méta : budget + urgence.
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 7,
+            runSpacing: 7,
+            children: [
+              TaBadge.neutral(context, label: d.budget, icon: TaIcons.wallet),
+              if (d.urgence == 'Urgent')
+                TaBadge(
+                  label: d.urgence,
+                  background: t.accentSoft,
+                  foreground: t.accentStrong,
+                  icon: TaIcons.clock,
+                )
+              else
+                TaBadge.neutral(context, label: d.urgence, icon: TaIcons.clock),
+            ],
+          ),
+          // Actions selon le statut.
+          const SizedBox(height: 14),
+          _DemandeActions(demande: d),
+        ],
+      ),
     );
   }
 }
 
+/// Actions de la carte : devis (nouvelle) ou conversation (sinon).
 class _DemandeActions extends StatelessWidget {
   const _DemandeActions({required this.demande});
 
@@ -218,35 +205,43 @@ class _DemandeActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (demande.statut == DemandeStatut.nouvelle) {
-      return Wrap(
+      return Row(
         spacing: 8,
-        runSpacing: 8,
         children: [
-          TaButton(
-            label: 'Détails',
-            variant: TaButtonVariant.outline,
-            small: true,
-            onPressed: () => showDemandeDetailSheet(context, demande: demande),
+          Expanded(
+            child: TaButton(
+              label: 'Détails',
+              variant: TaButtonVariant.outline,
+              small: true,
+              expanded: true,
+              onPressed: () =>
+                  showDemandeDetailSheet(context, demande: demande),
+            ),
           ),
-          TaButton(
-            label: 'Envoyer un devis',
-            small: true,
-            onPressed: () => showCreateDevisSheet(context, demande: demande),
-            leading: TaIcon(
-              TaIcons.doc,
-              size: 13,
-              mono: true,
-              color: TaButton.inkColor(context, TaButtonVariant.cta),
+          Expanded(
+            child: TaButton(
+              label: 'Envoyer un devis',
+              small: true,
+              expanded: true,
+              onPressed: () => showCreateDevisSheet(context, demande: demande),
+              leading: TaIcon(
+                TaIcons.doc,
+                size: 13,
+                mono: true,
+                color: TaButton.inkColor(context, TaButtonVariant.cta),
+              ),
             ),
           ),
         ],
       );
     }
+    // Statuts non nouveaux : ouvrir la conversation (détail pour l'instant).
     return TaButton(
       label: 'Ouvrir la conversation',
       variant: TaButtonVariant.soft,
       small: true,
-      onPressed: () {},
+      expanded: true,
+      onPressed: () => showDemandeDetailSheet(context, demande: demande),
       leading: const TaIcon(TaIcons.chat, size: 13),
     );
   }

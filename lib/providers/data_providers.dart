@@ -23,8 +23,56 @@ final artisanProvider = Provider.family<Artisan, String>(
 
 final avisProvider = Provider<List<Review>>((ref) => MockData.avis);
 
-final realisationsProvider = Provider<List<Realisation>>(
-  (ref) => MockData.realisations,
+/// Réalisations — mutable (ajout local depuis l'espace artisan).
+class RealisationsNotifier extends Notifier<List<Realisation>> {
+  int _counter = 100;
+
+  @override
+  List<Realisation> build() => MockData.realisations;
+
+  void add({
+    required String titre,
+    required String type,
+    required String duree,
+    required String commune,
+    required String description,
+  }) {
+    state = [
+      Realisation(
+        id: 'p${_counter++}',
+        titre: titre,
+        type: type,
+        duree: duree,
+        commune: commune,
+        description: description,
+      ),
+      ...state,
+    ];
+  }
+}
+
+final realisationsProvider =
+    NotifierProvider<RealisationsNotifier, List<Realisation>>(
+      RealisationsNotifier.new,
+    );
+
+final realisationProvider = Provider.family<Realisation?, String>((ref, id) {
+  for (final r in ref.watch(realisationsProvider)) {
+    if (r.id == id) return r;
+  }
+  return null;
+});
+
+/// Profil artisan connecté — mutable (édition locale).
+class ProProfileNotifier extends Notifier<Artisan> {
+  @override
+  Artisan build() => MockData.artisans.first;
+
+  void update(Artisan artisan) => state = artisan;
+}
+
+final proProfileProvider = NotifierProvider<ProProfileNotifier, Artisan>(
+  ProProfileNotifier.new,
 );
 
 /// Conversations — mutable pour l'envoi local de messages (en attendant l'API).
